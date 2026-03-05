@@ -4,7 +4,7 @@ This documentation outlines how to call the [Miro](https://mirobiometrics.com/) 
 
 A client package for Node that follows these steps can be found [here](https://github.com/mirobiometrics/Miro-JSClient).
 
-## Assumption
+## Assumptions
 
 * This documentation assumes you have set up a Miro Identity Instance. See documentation [here]() for instructions.
 
