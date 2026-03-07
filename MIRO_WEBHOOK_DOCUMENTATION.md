@@ -61,7 +61,7 @@ Content-Type: application/json
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `action` | string | The event type: `ENROLL`, `RECOGNIZE`, or `DELETE` |
+| `action` | string | The event type: `ENROLL`, `RECOGNIZE`, `DELETE`, or `ADMIN_DELETE` |
 | `timestamp` | string | ISO 8601 timestamp of the event |
 | `instanceId` | string | The Identity Instance that processed the request |
 | `profileId` | string | The profile involved in the event |
