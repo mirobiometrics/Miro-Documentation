@@ -5,16 +5,21 @@ This documentation outlines how to call the [Miro](https://mirobiometrics.com/) 
 A client package for Node that follows these steps can be found [here](https://github.com/mirobiometrics/Miro-JSClient).
 
 ## Assumptions
-
-* This documentation assumes you have set up a Miro Identity Instance. See documentation [here]() for instructions.
-
+* This documentation assumes you have set up a Miro Identity Instance on the [Miro Admin Dashboard](https://dashboard.mirobiometrics.com/).
 * This examples in this documentation uses the the command line and Python CLI in example to process images. The examples in this documentation require:
-**  Python 3.7+
-**  `cryptography` package: `pip3 install cryptography`
-**  `curl` command-line tool
+  *  Python 3.7+
+  *  `cryptography` package: `pip3 install cryptography`
+  *  `curl` command-line tool
 
+## Requirements
+* Image Requirements:
+  * Images must be less than 6Mbs in size.
+  * Image resolution must be between 800x800 and 2400x2400.
+* Request Requirements:
+  * Request timestamps must be must be within a few minutes of the current server time.
+  * Each request must contain a unique image. Submitting the same image multiple times will be rejected.
 
-## Authentication
+## API Authentication
 
 All requests require HMAC-SHA256 signature authentication.
 
