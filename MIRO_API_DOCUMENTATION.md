@@ -14,7 +14,7 @@ A client package for Node that follows these steps can be found [here](https://g
 ## Requirements
 * Image Requirements:
   * Images must be less than 6Mbs in size.
-  * Image resolution must be between 800x800 and 2400x2400.
+  * Image resolution must be between 1080x1080 and 2400x2400. Portrait images are preferred.
 * Request Requirements:
   * Request timestamps must be must be within a few minutes of the current server time.
   * Each request must contain a unique image. Submitting the same image multiple times will be rejected.
