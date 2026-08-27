@@ -2,7 +2,7 @@
 
 This documentation outlines how to configure and receive [Miro](https://mirobiometrics.com/) webhook notifications for real-time enrollment, recognition, and deletion events.
 
-When a webhook URL is configured on an Identity Instance, Miro will send an asynchronous HTTP POST request to that URL each time an enrollment, recognition, or deletion event occurs. This allows your backend to react to biometric events in near real time without.
+When a webhook URL is configured on an Identity Instance, Miro will send an asynchronous HTTP POST request to that URL each time an enrollment, recognition, or deletion event occurs. This allows your backend to react to biometric events in near real time without the need for a physical connection to the device.
 
 ## Assumptions
 
