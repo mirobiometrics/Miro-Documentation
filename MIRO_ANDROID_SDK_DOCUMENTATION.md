@@ -70,6 +70,44 @@ MiroSDK.configure(
 |----------|------|---------|-------------|
 | `cameraSelector` | `CameraSelector` | `DEFAULT_BACK_CAMERA` | Which lens to bind. The back lens is strongly preferred — it has a torch, and palm ridge contrast depends on it. |
 | `imageMirrored` | `Boolean` | `false` | Set `true` when the lens produces horizontally mirrored output, so the backend un-mirrors before matching. Required for the front (selfie) camera. |
+| `previewBackground` | `PreviewBackground` | `LivePreview` | What the guidance overlay is drawn on. Use `MiroSDK.PreviewBackground.Gradient()` to hide the camera feed without changing capture — detection, the target ring and the palm dot all behave exactly as they do over the live preview. |
+| `containerViewId` | `Int` | `android.R.id.content` | The view capture is rendered into. Defaults to the whole activity. Give it a container in your own layout to embed capture (see section below). |
+
+### Embedded capture
+
+By default the capture UI fills the activity. Pass `containerViewId` to render it
+into a view of your own instead, such as a panel beside your UI, a card, one pane of a
+split layout:
+
+```kotlin
+MiroSDK.configure(
+    credentials = MiroSDK.Credentials(instanceId = "...", secret = "..."),
+    captureConfig = MiroSDK.CaptureConfig(containerViewId = R.id.palm_capture_panel)
+)
+
+// Unchanged — the SDK still drives capture and returns to the same call.
+val result = MiroSDK.recognize(activity)
+```
+
+Nothing else about the flow changes, and the guidance overlay adapts to the
+container's shape: palm positions are fractions of the camera frame, so the SDK
+maps them onto the rectangle the frame actually occupies in your container
+rather than stretching them across it.
+
+Embedding does hand you three responsibilities that full-screen capture handles
+for you:
+
+- **The container must be attached, laid out and visible before you start a
+  capture**, and large enough to frame a hand. Capture added to a hidden or
+  zero-size container runs with nothing on screen — the SDK logs a warning, but
+  the user sees no preview and no way to cancel.
+- **Your activity keeps its own orientation.** Full-screen capture locks to
+  portrait for the duration; embedded capture deliberately does not, since
+  rotating your app around its own panel would be wrong.
+- **A configuration change cancels an embedded capture.** Because orientation is
+  not locked, a rotation destroys the capture UI and the call returns
+  `CAPTURE_CANCELLED`. If you allow rotation while capture is running, either
+  lock it yourself for the duration or handle the cancellation and restart.
 
 ## API Methods
 
@@ -193,10 +231,11 @@ fun handleResult(result: MiroSDK.SdkResult) {
 
 | Error Code | Description |
 |------------|-------------|
-| `MISSING_CREDENTIALS` | `MiroSDK.configure()` was not called |
+| `MISSING_CREDENTIALS` | `MiroSDK.configure()` was not called, or was called with a blank `instanceId` or `secret`. Returned before the capture UI is shown, so the user is not asked to present a palm. |
 | `KEY_EXCHANGE_FAILED` | Failed to fetch RSA public key from server |
 | `IMAGE_QUALITY` | Captured image failed quality checks (too blurry, too dark, or too bright) |
 | `CAPTURE_CANCELLED` | User dismissed the capture UI |
+| `CAPTURE_IN_PROGRESS` | A capture is already running. Only one runs at a time: A second request is refused rather than started, since two would compete for the same camera or scanner. |
 | `VERIFICATION_FAILED` | The verification check completed and the palm is not the claimed identity |
 | `SDK_UPDATE_REQUIRED` | The backend no longer supports this SDK version — ship an update |
 | `UNKNOWN_ERROR` | The server returned an error the SDK could not classify |
