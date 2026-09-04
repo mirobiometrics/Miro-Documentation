@@ -78,14 +78,15 @@ Each method takes a `presenting` view controller, which the capture screen is pr
 
 ### Enroll
 
-Creates a biometric profile from a palm image. Captures the first palm, then offers a second — enrolling both hands materially improves later recognition, so the prompt is shown either way.
+Creates a biometric profile from one or two palm images. The first palm is always captured; `palms` decides whether a second is offered and whether it can be skipped. A two-palm profile can be recognised from either hand, so prefer a mode that gets a second palm wherever the user will give one.
 
 ```swift
 Task {
     let result = await MiroSDK.shared.enroll(
         presenting: self,
         customerId: "user-123",          // optional
-        customerData: "encrypted-data"   // optional
+        customerData: "encrypted-data",  // optional
+        palms: .twoRequired              // optional, defaults to .oneRequired
     )
     handleResult(result)
 }
@@ -96,7 +97,21 @@ Task {
 | `presenting` | `UIViewController` | Yes | The controller to present the capture screen from |
 | `customerId` | `String?` | No | Unique customer identifier to associate with the profile |
 | `customerData` | `String?` | No | Encrypted customer data to store with the profile |
-| `requireTwoPalms` | `Bool` | No | When `true`, the second palm cannot be skipped. Defaults to `false` |
+| `palms` | `PalmRequirement` | No | How many palms to capture. Defaults to `.oneRequired` |
+
+`palms` takes one of three values:
+
+| Mode | Second capture | Skippable |
+|------|----------------|-----------|
+| `.strictlyOne` | never shown | — |
+| `.oneRequired` | shown | Yes, via a Skip button |
+| `.twoRequired` | shown | No — complete it or cancel the enrollment |
+
+Cancelling either capture cancels the whole enrollment. Under `.oneRequired` a skipped second palm still enrolls the profile, with one palm. On the wire this is simply whether `palm2` is present in the enroll request, where it is already optional — see the API documentation.
+
+These are the same three modes as the Android SDK's `PalmRequirement`, in Swift casing: `.strictlyOne` is Android's `STRICTLY_ONE`, and so on. Telemetry reports the Android spelling on both platforms, so one dashboard covers both.
+
+**Replaces `requireTwoPalms: Bool`, which has been removed.** Pass `.twoRequired` where you passed `true`, and `.oneRequired` where you passed `false` or nothing at all. `false` meant "offer a second palm, let it be skipped", so `.strictlyOne` is new behaviour rather than the old default.
 
 ### Recognize
 

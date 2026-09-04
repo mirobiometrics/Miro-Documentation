@@ -115,14 +115,15 @@ All SDK methods are `suspend` functions and must be called from a coroutine scop
 
 ### Enroll
 
-Creates a biometric profile from a palm image. Captures the first palm, then offers a second — enrolling both hands materially improves later recognition, so the prompt is shown either way.
+Creates a biometric profile from one or two palm images. The first palm is always captured; `palms` decides whether a second is offered and whether it can be skipped. A two-palm profile can be recognised from either hand, so prefer a mode that gets a second palm wherever the user will give one.
 
 ```kotlin
 lifecycleScope.launch {
     val result = MiroSDK.enroll(
         activity = this@MainActivity,
         customerId = "user-123",       // optional
-        customerData = "encrypted-data" // optional
+        customerData = "encrypted-data", // optional
+        palms = MiroSDK.PalmRequirement.TWO_REQUIRED // optional, defaults to ONE_REQUIRED
     )
     handleResult(result)
 }
@@ -133,7 +134,19 @@ lifecycleScope.launch {
 | `activity` | `FragmentActivity` | Yes | The hosting activity |
 | `customerId` | `String?` | No | Unique customer identifier to associate with the profile |
 | `customerData` | `String?` | No | Encrypted customer data to store with the profile |
-| `requireTwoPalms` | `Boolean` | No | When `true`, the second palm cannot be skipped. Defaults to `false` |
+| `palms` | `PalmRequirement` | No | How many palms to capture. Defaults to `ONE_REQUIRED` |
+
+`palms` takes one of three values:
+
+| Mode | Second capture | Skippable |
+|------|----------------|-----------|
+| `STRICTLY_ONE` | never shown | — |
+| `ONE_REQUIRED` | shown | Yes, via a Skip button |
+| `TWO_REQUIRED` | shown | No — complete it or cancel the enrollment |
+
+Cancelling either capture cancels the whole enrollment. Under `ONE_REQUIRED` a skipped second palm still enrolls the profile, with one palm. On the wire this is simply whether `palm2` is present in the enroll request, where it is already optional — see the API documentation.
+
+**Replaces `requireTwoPalms: Boolean`, which has been removed.** Pass `TWO_REQUIRED` where you passed `true`, and `ONE_REQUIRED` where you passed `false` or nothing at all. `false` meant "offer a second palm, let it be skipped", so `STRICTLY_ONE` is new behaviour rather than the old default.
 
 ### Recognize
 
